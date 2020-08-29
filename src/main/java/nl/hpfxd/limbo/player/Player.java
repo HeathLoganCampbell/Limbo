@@ -91,16 +91,18 @@ public class Player {
 
                 this.state = ProtocolState.PLAY;
 
-                this.sendPacket(new PacketJoinGame(0, 1, 0, 0, 1, "flat", false));
-                this.sendPacket(new PacketSpawnPosition());
-                this.sendPacket(new PacketPositionAndLook(0, 100, 0, 0, 0));
+                this.sendBatchPackets(
+                        new PacketJoinGame(0, 1, 0, 0, 1, "flat", false),
+                        new PacketSpawnPosition(),
+                        new PacketPositionAndLook(0, 100, 0, 0, 0))
+                );
 
                 if (Limbo.getInstance().getJoinMessage() != null) {
                     this.sendPacket(new PacketChatMessage(Limbo.getInstance().getJoinMessage(), ChatMessagePosition.SYSTEM));
                 }
 
                 if (this.version >= ProtocolVersion.PROTOCOL_1_8 && Limbo.getInstance().getJoinMessage() != null) {
-                    this.sendPacket(new PacketExtraTablistInfo(Limbo.getInstance().getPlayerListHeader(), Limbo.getInstance().getPlayerListFooter()));
+                    sendExtraTabListInfo(Limbo.getInstance().getPlayerListHeader(), Limbo.getInstance().getPlayerListFooter());
                 }
 
                 log.info("Player " + this.name + " joined the game.");
@@ -152,6 +154,23 @@ public class Player {
     public void sendPacket(Packet packet) {
         packet.setProtocolVersion(this.version);
         this.channel.writeAndFlush(packet);
+    }
+
+    public void sendBatchPackets(Packet... packets)
+    {
+        for (Packet packet : packets)
+        {
+            packet.setProtocolVersion(this.version);
+            this.channel.write(packet);
+        }
+        this.channel.flush();
+    }
+
+    public void sendExtraTabListInfo(String header, String footer)
+    {
+        if (this.version >= ProtocolVersion.PROTOCOL_1_8 && Limbo.getInstance().getJoinMessage() != null) {
+            this.sendPacket(new PacketExtraTablistInfo(header, footer));
+        }
     }
 
     public void disconnect(JSONObject reason) {
