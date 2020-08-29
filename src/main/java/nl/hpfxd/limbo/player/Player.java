@@ -94,7 +94,7 @@ public class Player {
                 this.sendBatchPackets(
                         new PacketJoinGame(0, 1, 0, 0, 1, "flat", false),
                         new PacketSpawnPosition(),
-                        new PacketPositionAndLook(0, 100, 0, 0, 0))
+                        new PacketPositionAndLook(0, 100, 0, 0, 0)
                 );
 
                 if (Limbo.getInstance().getJoinMessage() != null) {
